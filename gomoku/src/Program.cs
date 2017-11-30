@@ -2,12 +2,14 @@
 
 namespace gomoku
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             Console.WriteLine("Hello World!");
             Console.WriteLine("Trying git");
+            Console.ReadLine();
+            Console.ReadLine();
         }
     }
 }
