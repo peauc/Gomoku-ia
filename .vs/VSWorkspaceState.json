@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\gomoku"
+    "\\gomoku",
+    "\\gomoku\\build",
+    "\\gomoku\\src"
   ],
-  "SelectedNode": "\\gomoku\\gomoku.sln",
+  "SelectedNode": "\\gomoku\\build\\gomoku.sln",
   "PreviewInSolutionExplorer": false
 }
