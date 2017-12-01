@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
 
-    public class HeuristicAnalysis : IHeuristicAnalysis
+    public class HeuristicAnalysis
     {
         public HeuristicAnalysis()
         {
@@ -47,29 +47,29 @@
 
         public List<Pattern> Patterns { get; set; }
 
-        public int Compute(GameState state)
+        public int Compute(int[,] board)
         {
             int score = 0;
 
-            for (int x = 0; x < GameState.GomokuBoardSize; x++)
+            for (int x = 0; x < GomocupEngine.MAX_BOARD; x++)
             {
-                score += this.ComputeLine(state, x, 0, 0, 1);
-                score += this.ComputeLine(state, x, 0, 1, 1);
+                score += this.ComputeLine(board, x, 0, 0, 1);
+                score += this.ComputeLine(board, x, 0, 1, 1);
             }
 
-            for (int y = 0; y < GameState.GomokuBoardSize; y++)
+            for (int y = 0; y < GomocupEngine.MAX_BOARD; y++)
             {
-                score += this.ComputeLine(state, 0, y, 1, 0);
+                score += this.ComputeLine(board, 0, y, 1, 0);
                 if (y != 0)
                 {
-                    score += this.ComputeLine(state, 0, y, 1, 1);
+                    score += this.ComputeLine(board, 0, y, 1, 1);
                 }
             }
 
             return score;
         }
 
-        private int ComputeLine(GameState state, int initX, int initY, int xInc, int yInc)
+        private int ComputeLine(int[,] board, int initX, int initY, int xInc, int yInc)
         {
             int score = 0;
 
@@ -79,18 +79,18 @@
                 pattern.CurrentIndexOpponent = 0;
             }
 
-            while (initX < GameState.GomokuBoardSize && initY < GameState.GomokuBoardSize)
+            while (initX < GomocupEngine.MAX_BOARD && initY < GomocupEngine.MAX_BOARD)
             {
                 foreach (Pattern pattern in this.Patterns)
                 {
                     // Check self score
-                    if (pattern.Validate(state.Map[initY][initX]))
+                    if (pattern.Validate(board[initY, initX]))
                     {
                         score += pattern.SelfScore;
                     }
 
                     // Check opponent's score
-                    if (pattern.ValidateOpponent(state.Map[initY][initX]))
+                    if (pattern.ValidateOpponent(board[initY, initX]))
                     {
                         score -= pattern.OpponentScore;
                     }

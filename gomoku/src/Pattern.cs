@@ -1,6 +1,5 @@
 ﻿namespace Gomoku
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -8,26 +7,19 @@
     {
         public Pattern(string pattern, int selfScore, int opponentScore)
         {
-            this.Cells = new List<Cell>();
+            this.Cells = new List<int>();
             this.SelfScore = selfScore;
             this.OpponentScore = opponentScore;
             this.CurrentIndex = 0;
             this.CurrentIndexOpponent = 0;
 
-            Dictionary<char, Cell> charToCell = new Dictionary<char, Cell>
-                                                    {
-                                                        { '0', Cell.Free },
-                                                        { '1', Cell.Self },
-                                                        { '2', Cell.Opponent }
-                                                    };
-
             foreach (char c in pattern)
             {
-                this.Cells.Add(charToCell[c]);
+                this.Cells.Add((int)char.GetNumericValue(c));
             }
         }
 
-        public List<Cell> Cells { get; }
+        public List<int> Cells { get; }
 
         public int SelfScore { get; }
 
@@ -37,7 +29,7 @@
 
         public int CurrentIndexOpponent { get; set; }
 
-        public bool Validate(Cell cell)
+        public bool Validate(int cell)
         {
             if (cell == this.Cells[this.CurrentIndex])
             {
@@ -57,9 +49,9 @@
             return false;
         }
 
-        public bool ValidateOpponent(Cell cell)
+        public bool ValidateOpponent(int cell)
         {
-            if (cell.Reversed() == this.Cells[this.CurrentIndexOpponent])
+            if (((cell == 1) ? 2 : 1) == this.Cells[this.CurrentIndexOpponent])
             {
                 this.CurrentIndexOpponent++;
             }
