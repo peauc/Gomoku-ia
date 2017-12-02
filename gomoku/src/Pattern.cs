@@ -51,7 +51,7 @@
 
         public bool ValidateOpponent(int cell)
         {
-            if (((cell == 1) ? 2 : 1) == this.Cells[this.CurrentIndexOpponent])
+            if (((cell == 0) ? 0 : (cell == 2) ? 1 : 2) == this.Cells[this.CurrentIndexOpponent])
             {
                 this.CurrentIndexOpponent++;
             }

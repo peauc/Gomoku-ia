@@ -4,8 +4,14 @@
 
     public class HeuristicAnalysis
     {
-        public HeuristicAnalysis()
+        private readonly int width;
+
+        private readonly int height;
+
+        public HeuristicAnalysis(int width, int height)
         {
+            this.width = width;
+            this.height = height;
             this.Patterns = new List<Pattern>
             {
                 new Pattern("11111", 100000, 10000),
@@ -51,13 +57,13 @@
         {
             int score = 0;
 
-            for (int x = 0; x < GomocupEngine.MAX_BOARD; x++)
+            for (int x = 0; x < this.width; x++)
             {
                 score += this.ComputeLine(board, x, 0, 0, 1);
                 score += this.ComputeLine(board, x, 0, 1, 1);
             }
 
-            for (int y = 0; y < GomocupEngine.MAX_BOARD; y++)
+            for (int y = 0; y < this.height; y++)
             {
                 score += this.ComputeLine(board, 0, y, 1, 0);
                 if (y != 0)
@@ -79,7 +85,17 @@
                 pattern.CurrentIndexOpponent = 0;
             }
 
-            while (initX < GomocupEngine.MAX_BOARD && initY < GomocupEngine.MAX_BOARD)
+            // Check border
+            foreach (Pattern pattern in this.Patterns)
+            {
+                // Check self score
+                pattern.Validate(2);
+
+                // Check opponent's score
+                pattern.ValidateOpponent(1);
+            }
+
+            while (initX < this.width && initY < this.height)
             {
                 foreach (Pattern pattern in this.Patterns)
                 {
@@ -98,6 +114,22 @@
 
                 initX += xInc;
                 initY += yInc;
+            }
+
+            // Check border
+            foreach (Pattern pattern in this.Patterns)
+            {
+                // Check self score
+                if (pattern.Validate(2))
+                {
+                    score += pattern.SelfScore;
+                }
+
+                // Check opponent's score
+                if (pattern.ValidateOpponent(1))
+                {
+                    score -= pattern.OpponentScore;
+                }
             }
 
             return score;
