@@ -156,42 +156,53 @@ namespace Gomoku
             return 2;
         }
 
-        //public override void brain_moves()
-        //{
-        //    Console.WriteLine("Displaying available moves :");
-        //    this.DisplayMoves(this.movesAvailable);
-        //    Console.WriteLine();
-        //    Console.WriteLine("Displaying unavailable moves :");
-        //    this.DisplayMoves(this.movesUnavailable);
-        //    Console.WriteLine();
-        //}
+        public override void BrainMoves()
+        {
+            Console.WriteLine("Displaying available moves :");
+            this.DisplayMoves(this.movesAvailable);
+            Console.WriteLine();
+            Console.WriteLine("Displaying unavailable moves :");
+            this.DisplayMoves(this.movesUnavailable);
+            Console.WriteLine();
+        }
 
         public override void BrainTurn()
         {
-            Tuple<int, int> bestMove = this.AlphaBeta(1, int.MinValue, int.MaxValue, true, -1);
+            Tuple<int, int> bestMove = this.AlphaBeta(2, int.MinValue, int.MaxValue, true, -1);
             if (bestMove.Item2 != -1)
             {
                 this.DoMymove(this.movesAvailable[bestMove.Item2].Item1, this.movesAvailable[bestMove.Item2].Item2);
             }
         }
 
-        //public override void brain_display()
-        //{
-        //    for (int y = 0; y < this.height; y++)
-        //    {
-        //        for (int x = 0; x < this.width; x++)
-        //        {
-        //            Console.Write(this.board[y, x]);
-        //        }
-        //        Console.WriteLine();
-        //    }
-        //}
+        public override void BrainDisplay()
+        {
+            for (int y = 0; y < this.Height; y++)
+            {
+                for (int x = 0; x < this.Width; x++)
+                {
+                    Console.Write(this.board[y, x]);
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public override void BrainHeuristic()
+        {
+            Console.WriteLine($"score = {this.heuristicAnalysis.Compute(this.board)}");
+        }
 
         private Tuple<int, int> AlphaBeta(int depth, int alpha, int beta, bool maximizingPlayer, int moveIndex)
         {
             if (depth == 0 || this.movesAvailable.Count == 0)
             {
-                return new Tuple<int, int>(this.heuristicAnalysis.Compute(this.board), moveIndex);
+                var yay = new Tuple<int, int>(this.heuristicAnalysis.Compute(this.board), moveIndex);
+                //if (moveIndex == 0 && depth == 0)
+                //{
+                //    this.BrainDisplay();
+                //    Console.WriteLine($"score = {yay.Item1}");
+                //}
+                return yay;
             }
 
             if (maximizingPlayer)
@@ -202,8 +213,8 @@ namespace Gomoku
                     Tuple<int, int> move = this.movesAvailable[0];
                     this.ApplyMove(this.movesAvailable[0], 1);
                     Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, false, i);
-                    ////if (depth == 3)
-                    //Console.WriteLine($"Move [{move.Item1},{move.Item2}] = {ret.Item1}");
+                    if (depth == 2)
+                        Console.WriteLine($"Move [{move.Item1},{move.Item2}] = {ret.Item1}");
                     max = (max.Item1 >= ret.Item1) ? max : ret;
                     alpha = (alpha >= max.Item1) ? alpha : max.Item1;
                     this.UnapplyMove();
@@ -220,7 +231,7 @@ namespace Gomoku
                 Tuple<int, int> min = new Tuple<int, int>(int.MaxValue, 0);
                 for (int i = 0; i < this.movesAvailable.Count; i++)
                 {
-                    this.ApplyMove(this.movesAvailable[0], 1);
+                    this.ApplyMove(this.movesAvailable[0], 2);
                     Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, true, i);
                     min = (min.Item1 <= ret.Item1) ? min : ret;
                     beta = (beta <= min.Item1) ? beta : min.Item1;

@@ -179,6 +179,13 @@ namespace Gomoku
         /// </param>
         public abstract void BrainOpponents(int x, int y); /* put opponent's move to the board */
 
+        // TODO remove
+        public abstract void BrainDisplay();
+
+        public abstract void BrainMoves();
+
+        public abstract void BrainHeuristic();
+
         /// <summary>
         /// The brain block.
         /// </summary>
@@ -262,6 +269,12 @@ namespace Gomoku
         protected void DoMymove(int x, int y)
         {
             this.BrainMy(x, y);
+            Console.WriteLine("{0},{1}", x, y);
+        }
+
+        protected void DoOpponentsMove(int x, int y)
+        {
+            this.BrainOpponents(x, y);
             Console.WriteLine("{0},{1}", x, y);
         }
 
@@ -418,6 +431,32 @@ namespace Gomoku
                     this.Stop();
                     this.BrainEnd();
                     Environment.Exit(0);
+                    break;
+
+                // TODO remove
+                case "display":
+                    this.BrainDisplay();
+                    break;
+
+                case "moves":
+                    this.BrainMoves();
+                    break;
+
+                case "opp":
+                    this.Start();
+                    if (!this.ParseCoord(param, out x, out y))
+                    {
+                        Console.WriteLine("ERROR bad coordinates");
+                    }
+                    else
+                    {
+                        this.DoOpponentsMove(x, y);
+                    }
+                    break;
+
+                case "score":
+                    this.Start();
+                    this.BrainHeuristic();
                     break;
 
                 case "board":

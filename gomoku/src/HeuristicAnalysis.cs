@@ -24,6 +24,18 @@
                 new Pattern("01110", 60, 60),
                 new Pattern("010110", 60, 60),
                 new Pattern("011010", 60, 60),
+
+                new Pattern("011112", 60, 60),
+                new Pattern("211110", 60, 60),
+                new Pattern("101112", 60, 60),
+                new Pattern("211101", 60, 60),
+                new Pattern("110112", 60, 60),
+                new Pattern("211011", 60, 60),
+                new Pattern("111012", 60, 60),
+                new Pattern("210111", 60, 60),
+                new Pattern("111102", 60, 60),
+                new Pattern("201111", 60, 60),
+
                 new Pattern("001112", 50, 50),
                 new Pattern("211100", 50, 50),
                 new Pattern("010112", 50, 50),
