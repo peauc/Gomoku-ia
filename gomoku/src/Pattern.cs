@@ -37,7 +37,7 @@
             }
             else
             {
-                this.CurrentIndex = 0;
+                this.CurrentIndex = cell == this.Cells[0] ? 1 : 0;
             }
 
             if (this.CurrentIndex == this.Cells.Count())
@@ -51,13 +51,14 @@
 
         public bool ValidateOpponent(int cell)
         {
-            if (((cell == 0) ? 0 : (cell == 2) ? 1 : 2) == this.Cells[this.CurrentIndexOpponent])
+            int c = (cell == 0) ? 0 : (cell == 2) ? 1 : 2;
+            if (c == this.Cells[this.CurrentIndexOpponent])
             {
                 this.CurrentIndexOpponent++;
             }
             else
             {
-                this.CurrentIndexOpponent = 0;
+                this.CurrentIndexOpponent = c == this.Cells[0] ? 1 : 0;
             }
 
             if (this.CurrentIndexOpponent == this.Cells.Count())
