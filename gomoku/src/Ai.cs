@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
 
     internal class GomocupEngine : GomocupInterface
@@ -27,7 +26,7 @@
 
         private HeuristicAnalysis heuristicAnalysis;
 
-        private List<Tuple<int, int>> optimalMoves;
+        private List<Tuple<int, int>> availableMoves;
 
         private List<Tuple<int, int>> disabledMoves;
 
@@ -75,12 +74,13 @@
             if (this.IsFree(x, y))
             {
                 this.board[y, x] = 1;
-                this.optimalMoves.Remove(new Tuple<int, int>(x, y));
+                this.availableMoves.Remove(new Tuple<int, int>(x, y));
                 this.disabledMoves.Add(new Tuple<int, int>(x, y));
             }
             else
             {
                 Console.WriteLine("ERROR my move [{0},{1}]", x, y);
+                Console.WriteLine($"Cell [{x}][{y}] = {this.board[y, x]}");
             }
         }
 
@@ -89,7 +89,7 @@
             if (this.IsFree(x, y))
             {
                 this.board[y, x] = 2;
-                this.optimalMoves.Remove(new Tuple<int, int>(x, y));
+                this.availableMoves.Remove(new Tuple<int, int>(x, y));
                 this.disabledMoves.Add(new Tuple<int, int>(x, y));
             }
             else
@@ -121,16 +121,6 @@
             return 2;
         }
 
-        public override void BrainMoves()
-        {
-            Console.WriteLine("Displaying available moves :");
-            this.DisplayMoves(this.optimalMoves);
-            Console.WriteLine();
-            Console.WriteLine("Displaying unavailable moves :");
-            this.DisplayMoves(this.disabledMoves);
-            Console.WriteLine();
-        }
-
         public override void BrainDisplay()
         {
             for (int y = 0; y < this.Height; y++)
@@ -142,11 +132,6 @@
 
                 Console.WriteLine();
             }
-        }
-
-        public override void BrainHeuristic()
-        {
-            Console.WriteLine($"score = {this.heuristicAnalysis.Compute(this.board)}");
         }
 
         public override void BrainEnd()
@@ -161,23 +146,17 @@
         {
             this.killerMove = null;
 
-            //Stopwatch stopwatch = new Stopwatch();
-            //stopwatch.Start();
-
             Tuple<int, int> bestMove = this.AlphaBeta(Depth, int.MinValue, int.MaxValue, true, this.heuristicAnalysis.Compute(this.board));
-
-            //stopwatch.Stop();
-            //Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
 
             if (bestMove.Item2 != -1)
             {
-                this.DoMymove(this.optimalMoves[bestMove.Item2].Item1, this.optimalMoves[bestMove.Item2].Item2);
+                this.DoMymove(this.availableMoves[bestMove.Item2].Item1, this.availableMoves[bestMove.Item2].Item2);
             }
         }
 
         private Tuple<int, int> AlphaBeta(int depth, int alpha, int beta, bool maximizingPlayer, int previousScore)
         {
-            if (depth == 0 || this.optimalMoves.Count == 0)
+            if (depth == 0 || this.availableMoves.Count == 0)
             {
                 return new Tuple<int, int>(this.heuristicAnalysis.Compute(this.board, this.disabledMoves.Last().Item1, this.disabledMoves.Last().Item2) + previousScore, 0);
             }
@@ -185,21 +164,19 @@
             if (maximizingPlayer)
             {
                 Tuple<int, int> max = new Tuple<int, int>(int.MinValue, 0);
-                int newScore;
 
-                for (int i = 0; i < this.optimalMoves.Count; i++)
+                for (int i = 0; i < this.availableMoves.Count; i++)
                 {
-                    Tuple<int, int> mv = this.optimalMoves.First();
-                    newScore = previousScore + this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
-                    this.ApplyMove(this.optimalMoves.First(), 1);
+                    Tuple<int, int> mv = this.availableMoves.First();
+                    int newScore = previousScore + this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
+                    this.ApplyMove(this.availableMoves.First(), 1);
                     newScore += this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
 
                     if (!this.IsAlone(mv.Item1, mv.Item2))
                     {
-                        //Console.Write($"Move [{mv.Item1}][{mv.Item2}] = ");
                         Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, false, newScore);
-                        //Console.WriteLine(ret.Item1);
-                        this.killerMove = new Tuple<Tuple<int, int>, int>(this.optimalMoves[ret.Item2], ret.Item2);
+
+                        this.killerMove = new Tuple<Tuple<int, int>, int>(this.availableMoves[ret.Item2], ret.Item2);
 
                         max = (max.Item1 >= ret.Item1) ? max : new Tuple<int, int>(ret.Item1, i);
                         alpha = (alpha >= max.Item1) ? alpha : max.Item1;
@@ -232,21 +209,20 @@
                                    this.killerMove.Item1.Item2);
 
                     Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, true, newScore);
-
                     min = (min.Item1 <= ret.Item1) ? min : new Tuple<int, int>(ret.Item1, this.killerMove.Item2);
                     beta = (beta <= min.Item1) ? beta : min.Item1;
-                    this.board[this.killerMove.Item1.Item2, this.killerMove.Item1.Item1] = 1;
+                    this.board[this.killerMove.Item1.Item2, this.killerMove.Item1.Item1] = 0;
                     if (alpha >= beta)
                     {
                         return min;
                     }
                 }
 
-                for (int i = 0; i < this.optimalMoves.Count; i++)
+                for (int i = 0; i < this.availableMoves.Count; i++)
                 {
-                    Tuple<int, int> mv = this.optimalMoves.First();
+                    Tuple<int, int> mv = this.availableMoves.First();
                     newScore = previousScore - this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
-                    this.ApplyMove(this.optimalMoves.First(), 2);
+                    this.ApplyMove(this.availableMoves.First(), 2);
 
                     if (!this.IsAlone(mv.Item1, mv.Item2))
                     {
@@ -271,50 +247,50 @@
 
         private void ResetMovesAvailable(int i)
         {
-            while (i < this.optimalMoves.Count)
+            while (i < this.availableMoves.Count)
             {
-                Tuple<int, int> mv = this.optimalMoves.First();
-                this.optimalMoves.Remove(mv);
-                this.optimalMoves.Add(mv);
+                Tuple<int, int> mv = this.availableMoves.First();
+                this.availableMoves.Remove(mv);
+                this.availableMoves.Add(mv);
                 i++;
             }
         }
 
         private void InitMoves()
         {
-            this.optimalMoves = new List<Tuple<int, int>>();
+            this.availableMoves = new List<Tuple<int, int>>();
             this.disabledMoves = new List<Tuple<int, int>>();
 
-            this.optimalMoves.Add(new Tuple<int, int>(this.Width / 2, this.Height / 2));
+            this.availableMoves.Add(new Tuple<int, int>(this.Width / 2, this.Height / 2));
 
             int x = (this.Width / 2) - 1;
             int y = (this.Height / 2) - 1;
             int xAmp = 2;
             int yAmp = 2;
 
-            while (this.optimalMoves.Count != this.Height * this.Width)
+            while (this.availableMoves.Count != this.Height * this.Width)
             {
                 for (int xi = 0; xi < xAmp; xi++)
                 {
-                    this.optimalMoves.Add(new Tuple<int, int>(x, y));
+                    this.availableMoves.Add(new Tuple<int, int>(x, y));
                     x++;
                 }
 
                 for (int yi = 0; yi < yAmp; yi++)
                 {
-                    this.optimalMoves.Add(new Tuple<int, int>(x, y));
+                    this.availableMoves.Add(new Tuple<int, int>(x, y));
                     y++;
                 }
 
                 for (int xi = 0; xi < xAmp; xi++)
                 {
-                    this.optimalMoves.Add(new Tuple<int, int>(x, y));
+                    this.availableMoves.Add(new Tuple<int, int>(x, y));
                     x--;
                 }
 
                 for (int yi = 0; yi < yAmp; yi++)
                 {
-                    this.optimalMoves.Add(new Tuple<int, int>(x, y));
+                    this.availableMoves.Add(new Tuple<int, int>(x, y));
                     y--;
                 }
 
@@ -332,14 +308,6 @@
             }
         }
 
-        private void DisplayMoves(List<Tuple<int, int>> moves)
-        {
-            foreach (Tuple<int, int> move in moves)
-            {
-                Console.WriteLine($"x = {move.Item1}; y = {move.Item2}");
-            }
-        }
-
         private bool IsAlone(int x, int y)
         {
             return !(from adjacentCell in this.adjacentCells let newX = x + adjacentCell.Item1 let newY = y + adjacentCell.Item2 where newX >= 0 && newX < this.Width && newY >= 0 && newY < this.Height && this.board[newY, newX] != 0 select newX).Any();
@@ -349,7 +317,7 @@
         {
             this.board[move.Item2, move.Item1] = player;
             this.disabledMoves.Add(move);
-            this.optimalMoves.Remove(move);
+            this.availableMoves.Remove(move);
         }
 
         private void UnapplyMove()
@@ -357,7 +325,7 @@
             Tuple<int, int> move = this.disabledMoves.Last();
 
             this.board[move.Item2, move.Item1] = 0;
-            this.optimalMoves.Add(move);
+            this.availableMoves.Add(move);
             this.disabledMoves.Remove(move);
         }
 

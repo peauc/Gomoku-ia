@@ -182,10 +182,6 @@ namespace Gomoku
         // TODO remove
         public abstract void BrainDisplay();
 
-        public abstract void BrainMoves();
-
-        public abstract void BrainHeuristic();
-
         /// <summary>
         /// The brain block.
         /// </summary>
@@ -438,10 +434,6 @@ namespace Gomoku
                     this.BrainDisplay();
                     break;
 
-                case "moves":
-                    this.BrainMoves();
-                    break;
-
                 case "opp":
                     this.Start();
                     if (!this.ParseCoord(param, out x, out y))
@@ -452,11 +444,6 @@ namespace Gomoku
                     {
                         this.DoOpponentsMove(x, y);
                     }
-                    break;
-
-                case "score":
-                    this.Start();
-                    this.BrainHeuristic();
                     break;
 
                 case "board":
