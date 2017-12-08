@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
     internal class GomocupEngine : GomocupInterface
@@ -29,6 +30,8 @@
         private List<Tuple<int, int>> optimalMoves;
 
         private List<Tuple<int, int>> disabledMoves;
+
+        private Tuple<Tuple<int, int>, int> killerMove;
 
         public override string BrainAbout => "name=\"DeepMind\", author=\"Peau_c Samuel_r\", version=\"-1\", country=\"France\", www=\"www.epitech.eu\"";
 
@@ -156,33 +159,47 @@
 
         public override void BrainTurn()
         {
-            Tuple<int, int> bestMove = this.AlphaBeta(Depth, int.MinValue, int.MaxValue, true);
+            this.killerMove = null;
+
+            //Stopwatch stopwatch = new Stopwatch();
+            //stopwatch.Start();
+
+            Tuple<int, int> bestMove = this.AlphaBeta(Depth, int.MinValue, int.MaxValue, true, this.heuristicAnalysis.Compute(this.board));
+
+            //stopwatch.Stop();
+            //Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+
             if (bestMove.Item2 != -1)
             {
                 this.DoMymove(this.optimalMoves[bestMove.Item2].Item1, this.optimalMoves[bestMove.Item2].Item2);
             }
         }
 
-        private Tuple<int, int> AlphaBeta(int depth, int alpha, int beta, bool maximizingPlayer)
+        private Tuple<int, int> AlphaBeta(int depth, int alpha, int beta, bool maximizingPlayer, int previousScore)
         {
             if (depth == 0 || this.optimalMoves.Count == 0)
             {
-                return new Tuple<int, int>(this.heuristicAnalysis.Compute(this.board), 0);
+                return new Tuple<int, int>(this.heuristicAnalysis.Compute(this.board, this.disabledMoves.Last().Item1, this.disabledMoves.Last().Item2) + previousScore, 0);
             }
 
             if (maximizingPlayer)
             {
                 Tuple<int, int> max = new Tuple<int, int>(int.MinValue, 0);
+                int newScore;
+
                 for (int i = 0; i < this.optimalMoves.Count; i++)
                 {
                     Tuple<int, int> mv = this.optimalMoves.First();
+                    newScore = previousScore + this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
                     this.ApplyMove(this.optimalMoves.First(), 1);
+                    newScore += this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
 
                     if (!this.IsAlone(mv.Item1, mv.Item2))
                     {
                         //Console.Write($"Move [{mv.Item1}][{mv.Item2}] = ");
-                        Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, false);
+                        Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, false, newScore);
                         //Console.WriteLine(ret.Item1);
+                        this.killerMove = new Tuple<Tuple<int, int>, int>(this.optimalMoves[ret.Item2], ret.Item2);
 
                         max = (max.Item1 >= ret.Item1) ? max : new Tuple<int, int>(ret.Item1, i);
                         alpha = (alpha >= max.Item1) ? alpha : max.Item1;
@@ -203,14 +220,37 @@
             {
                 // minimizing player
                 Tuple<int, int> min = new Tuple<int, int>(int.MaxValue, 0);
+                int newScore;
+
+                // Testing killer move
+                if (this.killerMove != null && this.killerMove.Item2 != 0 && !this.IsAlone(this.killerMove.Item1.Item1, this.killerMove.Item1.Item2))
+                {
+                    this.board[this.killerMove.Item1.Item2, this.killerMove.Item1.Item1] = 1;
+                    newScore = previousScore - this.heuristicAnalysis.Compute(
+                                   this.board,
+                                   this.killerMove.Item1.Item1,
+                                   this.killerMove.Item1.Item2);
+
+                    Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, true, newScore);
+
+                    min = (min.Item1 <= ret.Item1) ? min : new Tuple<int, int>(ret.Item1, this.killerMove.Item2);
+                    beta = (beta <= min.Item1) ? beta : min.Item1;
+                    this.board[this.killerMove.Item1.Item2, this.killerMove.Item1.Item1] = 1;
+                    if (alpha >= beta)
+                    {
+                        return min;
+                    }
+                }
+
                 for (int i = 0; i < this.optimalMoves.Count; i++)
                 {
                     Tuple<int, int> mv = this.optimalMoves.First();
+                    newScore = previousScore - this.heuristicAnalysis.Compute(this.board, mv.Item1, mv.Item2);
                     this.ApplyMove(this.optimalMoves.First(), 2);
 
                     if (!this.IsAlone(mv.Item1, mv.Item2))
                     {
-                        Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, true);
+                        Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, true, newScore);
 
                         min = (min.Item1 <= ret.Item1) ? min : new Tuple<int, int>(ret.Item1, i);
                         beta = (beta <= min.Item1) ? beta : min.Item1;
@@ -300,27 +340,9 @@
             }
         }
 
-        private int GetAdjacentCells(int x, int y)
-        {
-            return this.adjacentCells.Count(adjacentCell => this.board[y + adjacentCell.Item2, x + adjacentCell.Item1] != 0);
-        }
-
         private bool IsAlone(int x, int y)
         {
-            foreach (Tuple<int, int> adjacentCell in this.adjacentCells)
-            {
-                int newX = x + adjacentCell.Item1;
-                int newY = y + adjacentCell.Item2;
-
-                if (newX >= 0 && newX < this.Width &&
-                    newY >= 0 && newY < this.Height &&
-                    this.board[newY, newX] != 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return !(from adjacentCell in this.adjacentCells let newX = x + adjacentCell.Item1 let newY = y + adjacentCell.Item2 where newX >= 0 && newX < this.Width && newY >= 0 && newY < this.Height && this.board[newY, newX] != 0 select newX).Any();
         }
 
         private void ApplyMove(Tuple<int, int> move, int player)

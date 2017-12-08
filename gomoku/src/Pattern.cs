@@ -5,69 +5,63 @@
 
     public class Pattern
     {
+        private readonly List<int> cells;
+
+        private readonly int selfScore;
+
+        private readonly int opponentScore;
+
         public Pattern(string pattern, int selfScore, int opponentScore)
         {
-            this.Cells = new List<int>();
-            this.SelfScore = selfScore;
-            this.OpponentScore = opponentScore;
-            this.CurrentIndex = 0;
-            this.CurrentIndexOpponent = 0;
+            this.cells = new List<int>();
+            this.selfScore = selfScore;
+            this.opponentScore = opponentScore;
+            this.CurrentIndex = new int[4];
+            this.CurrentIndexOpponent = new int[4];
 
             foreach (char c in pattern)
             {
-                this.Cells.Add((int)char.GetNumericValue(c));
+                this.cells.Add((int)char.GetNumericValue(c));
             }
         }
 
-        public List<int> Cells { get; }
+        public int[] CurrentIndex { get; set; }
 
-        public int SelfScore { get; }
+        public int[] CurrentIndexOpponent { get; set; }
 
-        public int OpponentScore { get; }
-
-        public int CurrentIndex { get; set; }
-
-        public int CurrentIndexOpponent { get; set; }
-
-        public bool Validate(int cell)
+        public void Validate(int cell, int index, ref int score)
         {
-            if (cell == this.Cells[this.CurrentIndex])
+            if (cell == this.cells[this.CurrentIndex[index]])
             {
-                this.CurrentIndex++;
+                this.CurrentIndex[index]++;
+                if (this.CurrentIndex[index] == this.cells.Count())
+                {
+                    this.CurrentIndex[index] = 0;
+                    score += this.selfScore;
+                }
             }
             else
             {
-                this.CurrentIndex = cell == this.Cells[0] ? 1 : 0;
+                this.CurrentIndex[index] = cell == this.cells[0] ? 1 : 0;
             }
-
-            if (this.CurrentIndex == this.Cells.Count())
-            {
-                this.CurrentIndex = 0;
-                return true;
-            }
-
-            return false;
         }
 
-        public bool ValidateOpponent(int cell)
+        public void ValidateOpponent(int cell, int index, ref int score)
         {
             int c = (cell == 0) ? 0 : (cell == 2) ? 1 : 2;
-            if (c == this.Cells[this.CurrentIndexOpponent])
+            if (c == this.cells[this.CurrentIndexOpponent[index]])
             {
-                this.CurrentIndexOpponent++;
+                this.CurrentIndexOpponent[index]++;
+                if (this.CurrentIndexOpponent[index] == this.cells.Count())
+                {
+                    this.CurrentIndexOpponent[index] = 0;
+                    score -= this.opponentScore;
+                }
             }
             else
             {
-                this.CurrentIndexOpponent = c == this.Cells[0] ? 1 : 0;
+                this.CurrentIndexOpponent[index] = c == this.cells[0] ? 1 : 0;
             }
-
-            if (this.CurrentIndexOpponent == this.Cells.Count())
-            {
-                this.CurrentIndexOpponent = 0;
-                return true;
-            }
-
-            return false;
         }
     }
 }
