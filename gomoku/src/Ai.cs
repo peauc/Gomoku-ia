@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
     internal class GomocupEngine : GomocupInterface
@@ -23,6 +24,8 @@
                                                                    };
 
         private readonly int[,] board = new int[MaxBoard, MaxBoard];
+
+        private readonly Stopwatch stopWatch = new Stopwatch();
 
         private HeuristicAnalysis heuristicAnalysis;
 
@@ -145,8 +148,12 @@
         public override void BrainTurn()
         {
             this.killerMove = null;
+            this.stopWatch.Start();
 
             Tuple<int, int> bestMove = this.AlphaBeta(Depth, int.MinValue, int.MaxValue, true, this.heuristicAnalysis.Compute(this.board));
+
+            this.stopWatch.Stop();
+            this.stopWatch.Reset();
 
             if (bestMove.Item2 != -1)
             {
@@ -184,7 +191,7 @@
 
                     this.UnapplyMove();
 
-                    if (alpha >= beta)
+                    if (alpha >= beta || this.stopWatch.ElapsedMilliseconds > 4800)
                     {
                         this.ResetMovesAvailable(i + 1);
                         break; // BETA cut-off
