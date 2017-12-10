@@ -135,7 +135,6 @@
         {
             this.killerMove = null;
             this.stopWatch.Start();
-
             Tuple<int, int> bestMove = this.AlphaBeta(Depth, int.MinValue, int.MaxValue, true, this.heuristicAnalysis.Compute(this.board));
 
             this.stopWatch.Stop();
@@ -202,6 +201,7 @@
                                    this.killerMove.Item1.Item2);
 
                     Tuple<int, int> ret = this.AlphaBeta(depth - 1, alpha, beta, true, newScore);
+
                     min = (min.Item1 <= ret.Item1) ? min : new Tuple<int, int>(ret.Item1, this.killerMove.Item2);
                     beta = (beta <= min.Item1) ? beta : min.Item1;
                     this.board[this.killerMove.Item1.Item2, this.killerMove.Item1.Item1] = 0;

@@ -178,7 +178,7 @@
             if (this.xToCompute + this.yToCompute >= this.width)
             {
                 startX = this.xToCompute - (this.width - this.yToCompute) + 1;
-                startY = startX;
+                startY = this.height - 1;
             }
             else
             {
