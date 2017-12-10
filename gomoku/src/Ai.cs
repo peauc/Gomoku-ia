@@ -83,7 +83,6 @@
             else
             {
                 Console.WriteLine("ERROR my move [{0},{1}]", x, y);
-                Console.WriteLine($"Cell [{x}][{y}] = {this.board[y, x]}");
             }
         }
 
@@ -122,19 +121,6 @@
             }
 
             return 2;
-        }
-
-        public override void BrainDisplay()
-        {
-            for (int y = 0; y < this.Height; y++)
-            {
-                for (int x = 0; x < this.Width; x++)
-                {
-                    Console.Write(this.board[y, x]);
-                }
-
-                Console.WriteLine();
-            }
         }
 
         public override void BrainEnd()

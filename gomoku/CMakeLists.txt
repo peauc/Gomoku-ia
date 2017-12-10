@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 file(GLOB_RECURSE SRC src/*.cs)
 
 add_executable(gomoku ${SRC})
+target_compile_options(gomoku PRIVATE "/langversion:6")
 
 set_property(TARGET gomoku PROPERTY VS_DOTNET_REFERENCES
     "Microsoft.CSharp"
