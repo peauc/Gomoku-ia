@@ -35,44 +35,44 @@
 
         private Tuple<Tuple<int, int>, int> killerMove;
 
-        public override string BrainAbout => "name=\"DeepMind\", author=\"Peau_c Samuel_r\", version=\"-1\", country=\"France\", www=\"www.epitech.eu\"";
+        public override string brain_about => "name=\"DeepMind\", author=\"Peau_c Samuel_r\", version=\"-1\", country=\"France\", www=\"www.epitech.eu\"";
 
-        public override void BrainInit()
+        public override void brain_init()
         {
-            if (this.Width < 5 || this.Height < 5)
+            if (this.width < 5 || this.height < 5)
             {
                 Console.WriteLine("ERROR size of the board");
                 return;
             }
 
-            if (this.Width > MaxBoard || this.Height > MaxBoard)
+            if (this.width > MaxBoard || this.height > MaxBoard)
             {
                 Console.WriteLine("ERROR Maximal board size is " + MaxBoard);
                 return;
             }
 
             this.InitMoves();
-            this.heuristicAnalysis = new HeuristicAnalysis(this.Width, this.Height);
+            this.heuristicAnalysis = new HeuristicAnalysis(this.width, this.height);
             Console.WriteLine("OK");
         }
 
-        public override void BrainRestart()
+        public override void brain_restart()
         {
-            for (int x = 0; x < this.Width; x++)
+            for (int x = 0; x < this.width; x++)
             {
-                for (int y = 0; y < this.Height; y++)
+                for (int y = 0; y < this.height; y++)
                 {
                     this.board[x, y] = 0;
                 }
             }
 
             this.InitMoves();
-            this.heuristicAnalysis = new HeuristicAnalysis(this.Width, this.Height);
+            this.heuristicAnalysis = new HeuristicAnalysis(this.width, this.height);
 
             Console.WriteLine("OK");
         }
 
-        public override void BrainMy(int x, int y)
+        public override void brain_my(int x, int y)
         {
             if (this.IsFree(x, y))
             {
@@ -86,7 +86,7 @@
             }
         }
 
-        public override void BrainOpponents(int x, int y)
+        public override void brain_opponents(int x, int y)
         {
             if (this.IsFree(x, y))
             {
@@ -100,7 +100,7 @@
             }
         }
 
-        public override void BrainBlock(int x, int y)
+        public override void brain_block(int x, int y)
         {
             if (this.IsFree(x, y))
             {
@@ -112,9 +112,9 @@
             }
         }
 
-        public override int BrainTakeback(int x, int y)
+        public override int brain_takeback(int x, int y)
         {
-            if (x >= 0 && y >= 0 && x < this.Width && y < this.Height && this.board[x, y] != 0)
+            if (x >= 0 && y >= 0 && x < this.width && y < this.height && this.board[x, y] != 0)
             {
                 this.board[x, y] = 0;
                 return 0;
@@ -123,15 +123,15 @@
             return 2;
         }
 
-        public override void BrainEnd()
+        public override void brain_end()
         {
         }
 
-        public override void BrainEval(int x, int y)
+        public override void brain_eval(int x, int y)
         {
         }
 
-        public override void BrainTurn()
+        public override void brain_turn()
         {
             this.killerMove = null;
             this.stopWatch.Start();
@@ -143,7 +143,7 @@
 
             if (bestMove.Item2 != -1)
             {
-                this.DoMymove(this.availableMoves[bestMove.Item2].Item1, this.availableMoves[bestMove.Item2].Item2);
+                this.do_mymove(this.availableMoves[bestMove.Item2].Item1, this.availableMoves[bestMove.Item2].Item2);
             }
         }
 
@@ -254,14 +254,14 @@
             this.availableMoves = new List<Tuple<int, int>>();
             this.disabledMoves = new List<Tuple<int, int>>();
 
-            this.availableMoves.Add(new Tuple<int, int>(this.Width / 2, this.Height / 2));
+            this.availableMoves.Add(new Tuple<int, int>(this.width / 2, this.height / 2));
 
-            int x = (this.Width / 2) - 1;
-            int y = (this.Height / 2) - 1;
+            int x = (this.width / 2) - 1;
+            int y = (this.height / 2) - 1;
             int xAmp = 2;
             int yAmp = 2;
 
-            while (this.availableMoves.Count != this.Height * this.Width)
+            while (this.availableMoves.Count != this.height * this.width)
             {
                 for (int xi = 0; xi < xAmp; xi++)
                 {
@@ -287,13 +287,13 @@
                     y--;
                 }
 
-                if (xAmp < this.Width)
+                if (xAmp < this.width)
                 {
                     xAmp += 2;
                     x--;
                 }
 
-                if (yAmp < this.Height)
+                if (yAmp < this.height)
                 {
                     yAmp += 2;
                     y--;
@@ -303,7 +303,7 @@
 
         private bool IsAlone(int x, int y)
         {
-            return !(from adjacentCell in this.adjacentCells let newX = x + adjacentCell.Item1 let newY = y + adjacentCell.Item2 where newX >= 0 && newX < this.Width && newY >= 0 && newY < this.Height && this.board[newY, newX] != 0 select newX).Any();
+            return !(from adjacentCell in this.adjacentCells let newX = x + adjacentCell.Item1 let newY = y + adjacentCell.Item2 where newX >= 0 && newX < this.width && newY >= 0 && newY < this.height && this.board[newY, newX] != 0 select newX).Any();
         }
 
         private void ApplyMove(Tuple<int, int> move, int player)
@@ -324,7 +324,7 @@
 
         private bool IsFree(int x, int y)
         {
-            return x >= 0 && y >= 0 && x < this.Width && y < this.Height && this.board[y, x] == 0;
+            return x >= 0 && y >= 0 && x < this.width && y < this.height && this.board[y, x] == 0;
         }
     }
 }
